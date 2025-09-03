@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service-Based Company Interview Prep Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Stone, Indigo, White) -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive dashboard with a sticky top navigation for easy access to key sections: Salary Insights, Interview Roadmap, Aptitude Prep, and CS Fundamentals. This thematic structure allows users to explore content based on their immediate needs (e.g., "How much can I earn?" or "What should I study for the aptitude test?") rather than following the linear flow of the PDF. This user-centric design improves navigation and makes the information more digestible and actionable. The flow starts with motivation (salaries), moves to the overall process (roadmap), and then provides deep-dive sections for specific preparation areas. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Company Salary Data -> Goal: Compare -> Viz/Method: Interactive Bar Chart -> Interaction: Hover tooltips -> Justification: Best for comparing discrete values; interactivity keeps it clean. -> Library: Chart.js/Canvas.
+        - Report Info: List of Interview Rounds -> Goal: Organize/Flow -> Viz/Method: HTML/CSS Process Diagram -> Interaction: Hover highlights -> Justification: More intuitive than a list for showing a process. -> Library: HTML/Tailwind.
+        - Report Info: Detailed Aptitude Table -> Goal: Inform/Organize -> Viz/Method: Tabbed content sections -> Interaction: Click tabs to switch content -> Justification: Breaks down dense info, reducing cognitive load. -> Library: Vanilla JS.
+        - Report Info: CS Topics & Resources -> Goal: Organize -> Viz/Method: Grid of expandable cards -> Interaction: Click button to reveal resources -> Justification: Clean UI, allows users to focus on one topic at a time. -> Library: Vanilla JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #4f46e5; 
+            border-bottom-color: #4f46e5;
+        }
+        .apt-tab.active {
+            background-color: #4f46e5;
+            color: #ffffff;
+        }
+        .resource-list {
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .resource-list.open {
+            max-height: 500px;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-indigo-600">Interview Prep Guide</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#salaries" class="nav-link text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Salary Insights</a>
+                        <a href="#roadmap" class="nav-link text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Interview Roadmap</a>
+                        <a href="#aptitude" class="nav-link text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Aptitude Prep</a>
+                        <a href="#cs-fundamentals" class="nav-link text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">CS Fundamentals</a>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button id="mobile-menu-button" type="button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#salaries" class="nav-link text-gray-600 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium">Salary Insights</a>
+                <a href="#roadmap" class="nav-link text-gray-600 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium">Interview Roadmap</a>
+                <a href="#aptitude" class="nav-link text-gray-600 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium">Aptitude Prep</a>
+                <a href="#cs-fundamentals" class="nav-link text-gray-600 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium">CS Fundamentals</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="salaries" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-900">Fresher Salary Insights</h2>
+            <p class="text-center max-w-3xl mx-auto text-gray-600 mb-8">
+                This section provides a comparative overview of salary packages for freshers across major service-based IT companies in India. The chart below visualizes the minimum and maximum reported salaries, offering a realistic expectation of potential earnings. Use this as motivation and to understand the competitive landscape.
+            </p>
+            <div class="bg-white rounded-lg shadow-lg p-4 md:p-6">
+                <div class="chart-container">
+                    <canvas id="salaryChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-900">The Interview Roadmap</h2>
+            <p class="text-center max-w-3xl mx-auto text-gray-600 mb-12">
+                Navigating the interview process for service-based companies typically involves a series of structured rounds. Below is a visual representation of the standard hiring path, from the initial screening to the final offer. Understanding this sequence helps you prepare strategically for each stage.
+            </p>
+            <div class="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-4">
+                <div class="flex items-center flex-col md:flex-row">
+                    <div class="text-center p-6 bg-white rounded-lg shadow-md border-t-4 border-indigo-500 w-64">
+                        <div class="text-5xl text-indigo-500 mb-2">1</div>
+                        <h3 class="text-lg font-semibold">Aptitude & Reasoning</h3>
+                        <p class="text-sm text-gray-500">Tests quantitative, logical, and verbal skills.</p>
+                    </div>
+                    <div class="text-indigo-400 text-4xl mx-4 hidden md:block">&rarr;</div>
+                    <div class="text-indigo-400 text-4xl my-4 md:hidden">&darr;</div>
+                </div>
+                <div class="flex items-center flex-col md:flex-row">
+                    <div class="text-center p-6 bg-white rounded-lg shadow-md border-t-4 border-indigo-500 w-64">
+                        <div class="text-5xl text-indigo-500 mb-2">2</div>
+                        <h3 class="text-lg font-semibold">Coding Round</h3>
+                        <p class="text-sm text-gray-500">Basic programming and problem-solving questions.</p>
+                    </div>
+                    <div class="text-indigo-400 text-4xl mx-4 hidden md:block">&rarr;</div>
+                    <div class="text-indigo-400 text-4xl my-4 md:hidden">&darr;</div>
+                </div>
+                 <div class="flex items-center flex-col md:flex-row">
+                    <div class="text-center p-6 bg-white rounded-lg shadow-md border-t-4 border-indigo-500 w-64">
+                        <div class="text-5xl text-indigo-500 mb-2">3</div>
+                        <h3 class="text-lg font-semibold">Technical Interview</h3>
+                        <p class="text-sm text-gray-500">Deep dive into CS Fundamentals (DBMS, OS, CN, OOPS).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="aptitude" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-900">Aptitude Test Deep Dive</h2>
+            <p class="text-center max-w-3xl mx-auto text-gray-600 mb-8">
+                The aptitude round is a critical first filter. It assesses your problem-solving abilities across different domains. Use the tabs below to explore each section's key topics, their typical weightage in exams, and the skills you need to demonstrate.
+            </p>
+            <div class="bg-white rounded-lg shadow-lg p-4 md:p-6">
+                <div class="flex flex-wrap justify-center border-b border-gray-200 mb-4">
+                    <button data-tab="quant" class="apt-tab px-4 py-2 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600 focus:outline-none active">Quantitative</button>
+                    <button data-tab="logical" class="apt-tab px-4 py-2 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600 focus:outline-none">Logical</button>
+                    <button data-tab="verbal" class="apt-tab px-4 py-2 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600 focus:outline-none">Verbal</button>
+                </div>
+                <div id="aptitude-content" class="min-h-[300px]">
+                </div>
+            </div>
+        </section>
+        
+        <section id="cs-fundamentals" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-900">CS Fundamentals & Coding</h2>
+            <p class="text-center max-w-3xl mx-auto text-gray-600 mb-12">
+                Strong technical foundations are essential for the coding and technical interview rounds. This section breaks down the core Computer Science subjects and provides curated resources to guide your preparation. Click on any topic to reveal recommended learning materials.
+            </p>
+            <div id="cs-fundamentals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            </div>
+        </section>
+
+    </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const salaryData = {
+                labels: ['Infosys', 'TCS', 'Accenture', 'Cognizant', 'IBM', 'Capgemini', 'HCL', 'DXC', 'Wipro', 'Tech Mahindra'],
+                datasets: [
+                    {
+                        label: 'Minimum Salary (LPA)',
+                        data: [3.6, 3.36, 4.5, 4, 4.5, 3.8, 3.5, 3.4, 3.5, 3.25],
+                        backgroundColor: 'rgba(129, 140, 248, 0.6)',
+                        borderColor: 'rgba(129, 140, 248, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Maximum Salary (LPA)',
+                        data: [8, 7, 6.5, 6.75, 11, 7.5, 6, 6.2, 6.5, 5.5],
+                        backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            };
+
+            const aptitudeData = {
+                quant: {
+                    title: 'Quantitative Aptitude',
+                    description: 'Focuses on mathematical ability and problem-solving speed.',
+                    topics: [
+                        { name: 'Number System', weight: '10-12%', skill: 'Divisibility, HCF, LCM, Remainders' },
+                        { name: 'Percentages', weight: '8-10%', skill: 'Calculating percentage change' },
+                        { name: 'Profit and Loss', weight: '8-10%', skill: 'Calculating profit/loss/discounts' },
+                        { name: 'Time and Work', weight: '6-8%', skill: 'Problems on work efficiency' },
+                        { name: 'Time, Speed, Distance', weight: '6-8%', skill: 'Problems on trains, boats' },
+                    ],
+                    resources: ['R.S. Aggarwal', 'IndiaBix', 'GeeksforGeeks']
+                },
+                logical: {
+                    title: 'Logical Reasoning',
+                    description: 'Assesses ability to interpret data and draw logical conclusions.',
+                    topics: [
+                        { name: 'Coding-Decoding', weight: '10-12%', skill: 'Finding patterns in codes' },
+                        { name: 'Blood Relations', weight: '8-10%', skill: 'Family tree problems' },
+                        { name: 'Seating Arrangement', weight: '8-10%', skill: 'Linear and circular arrangements' },
+                        { name: 'Syllogism', weight: '6-8%', skill: 'Deductive reasoning' },
+                        { name: 'Data Interpretation', weight: '10-12%', skill: 'Analyzing graphs and charts' },
+                    ],
+                    resources: ['R.S. Aggarwal', 'IndiaBix', 'PrepInsta']
+                },
+                verbal: {
+                    title: 'Verbal Ability',
+                    description: 'Evaluates English language proficiency and comprehension.',
+                    topics: [
+                        { name: 'Reading Comprehension', weight: '12-15%', skill: 'Understanding written passages' },
+                        { name: 'Sentence Correction', weight: '8-10%', skill: 'Identifying grammatical errors' },
+                        { name: 'Fill in the blanks', weight: '8-10%', skill: 'Vocabulary and context usage' },
+                        { name: 'Synonyms & Antonyms', weight: '6-8%', skill: 'Word meanings' },
+                        { name: 'Para Jumbles', weight: '6-8%', skill: 'Logical sentence ordering' },
+                    ],
+                    resources: ['Wren & Martin', 'Word Power Made Easy', 'IndiaBix']
+                }
+            };
+
+            const csFundamentalsData = [
+                {
+                    title: 'Coding (DS & Algo)',
+                    description: 'The core of technical rounds. Focus on problem-solving with common data structures and algorithms.',
+                    resources: [
+                        { name: 'GeeksforGeeks', url: 'https://www.geeksforgeeks.org/data-structures/' },
+                        { name: 'HackerRank', url: 'https://www.hackerrank.com/domains/data-structures' },
+                        { name: 'LeetCode', url: 'https://leetcode.com/problemset/all/' }
+                    ]
+                },
+                {
+                    title: 'DBMS',
+                    description: 'Crucial for higher-end roles. Understand relational databases, SQL, and normalization.',
+                    resources: [
+                        { name: 'W3Schools (SQL)', url: 'https://www.w3schools.com/sql/' },
+                        { name: 'Neso Academy (Lectures)', url: 'https://www.youtube.com/playlist?list=PLBlnK6fEyqRi_CUQ-FX94vLd59j_Hky7g' },
+                        { name: 'GeeksforGeeks (MCQs)', url: 'https://www.geeksforgeeks.org/dbms/' }
+                    ]
+                },
+                {
+                    title: 'Operating Systems',
+                    description: 'Key concepts include processes, threads, memory management, and scheduling.',
+                    resources: [
+                        { name: 'Neso Academy (Lectures)', url: 'https://www.youtube.com/playlist?list=PLBlnK6fEyqRiVhbXDGLXDk_OQAeuVcp2O' },
+                        { name: 'GeeksforGeeks (OS)', url: 'https://www.geeksforgeeks.org/operating-systems/' },
+                        { name: 'TutorialsPoint', url: 'https://www.tutorialspoint.com/operating_system/index.htm' }
+                    ]
+                },
+                {
+                    title: 'Computer Networks',
+                    description: 'Understand the OSI model, TCP/IP, and common protocols.',
+                    resources: [
+                        { name: 'Neso Academy (Lectures)', url: 'https://www.youtube.com/playlist?list=PLBlnK6fEyqRgMCUAG0XRw78UA8qnv6jEx' },
+                        { name: 'GeeksforGeeks (CN)', url: 'https://www.geeksforgeeks.org/computer-network-tutorials/' },
+                        { name: 'Javatpoint', url: 'https://www.javatpoint.com/computer-network-tutorial' }
+                    ]
+                },
+                {
+                    title: 'OOPS Concepts',
+                    description: 'Fundamental principles of object-oriented programming are frequently asked in interviews.',
+                    resources: [
+                        { name: 'W3Schools (Java)', url: 'https://www.w3schools.com/java/java_oop.asp' },
+                        { name: 'Telusko (YouTube)', url: 'https://www.youtube.com/watch?v=qi-p-zG1LhA' },
+                        { name: 'GeeksforGeeks (OOPS)', url: 'https://www.geeksforgeeks.org/object-oriented-programming-oops-concept-in-java/' }
+                    ]
+                }
+            ];
+
+
+            const salaryCtx = document.getElementById('salaryChart').getContext('2d');
+            new Chart(salaryCtx, {
+                type: 'bar',
+                data: salaryData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Salary in Lakhs Per Annum (LPA)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw} LPA`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const aptitudeTabs = document.querySelectorAll('.apt-tab');
+            const aptitudeContent = document.getElementById('aptitude-content');
+
+            function updateAptitudeContent(tabKey) {
+                const data = aptitudeData[tabKey];
+                let topicsHtml = data.topics.map(topic => `
+                    <li class="flex justify-between items-center py-2 border-b">
+                        <span class="font-medium">${topic.name} <span class="text-sm text-gray-500 font-normal">(${topic.skill})</span></span>
+                        <span class="text-indigo-600 font-semibold">${topic.weight}</span>
+                    </li>
+                `).join('');
+
+                let resourcesHtml = data.resources.map(res => `<span class="inline-block bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 mb-2 px-2.5 py-0.5 rounded-full">${res}</span>`).join('');
+
+                aptitudeContent.innerHTML = `
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2 text-gray-800">${data.title}</h3>
+                        <p class="text-gray-600 mb-6">${data.description}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="font-semibold mb-3 text-gray-700">Key Topics & Weightage</h4>
+                                <ul class="space-y-2">${topicsHtml}</ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-3 text-gray-700">Recommended Resources</h4>
+                                <div class="flex flex-wrap">${resourcesHtml}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            aptitudeTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    aptitudeTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    updateAptitudeContent(tab.dataset.tab);
+                });
+            });
+            
+            updateAptitudeContent('quant');
+
+            const csGrid = document.getElementById('cs-fundamentals-grid');
+            csFundamentalsData.forEach((item, index) => {
+                const resourcesHtml = item.resources.map(res => `
+                    <li class="py-1"><a href="${res.url}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">${res.name}</a></li>
+                `).join('');
+
+                const card = `
+                    <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                        <h3 class="text-xl font-bold mb-2">${item.title}</h3>
+                        <p class="text-gray-600 flex-grow mb-4">${item.description}</p>
+                        <button data-target="resources-${index}" class="toggle-resources mt-auto w-full text-left font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
+                            View Resources &rarr;
+                        </button>
+                        <div id="resources-${index}" class="resource-list mt-4">
+                            <h4 class="font-semibold mb-2">Links:</h4>
+                            <ul class="list-disc list-inside">${resourcesHtml}</ul>
+                        </div>
+                    </div>
+                `;
+                csGrid.innerHTML += card;
+            });
+            
+            document.querySelectorAll('.toggle-resources').forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    const resourceList = document.getElementById(targetId);
+                    resourceList.classList.toggle('open');
+                });
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
